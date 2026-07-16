@@ -84,13 +84,17 @@ window.Statistics = (() => {
         const totalPrestiges = Object.values(state.albumPrestige || {})
             .reduce((sum, value) => sum + (Number(value) || 0), 0);
 
+        const bonusSummary = window.CollectionHub?.getEffectSummary?.();
         const rows = [
             ["Cromos únicos", `${format(state.inventario.length)} / ${format(cards.length)}`],
             ["Cromos nuevos obtenidos", format(state.stats.newCardsObtained || 0)],
             ["Duplicados", format(state.stats.duplicates || 0)],
             ["Fragmentos obtenidos", format(state.stats.fragmentsEarned || 0)],
             ["Fragmentos gastados", format(state.stats.fragmentsSpent || 0)],
-            ["Prestigios de álbum realizados", format(totalPrestiges)]
+            ["Prestigios de álbum realizados", format(totalPrestiges)],
+            ["Cromos favoritos", format(state.favorites?.length || 0)],
+            ["Cromos en vitrina", `${format(state.showcase?.length || 0)} / 6`],
+            ["Bonificaciones de colección", bonusSummary ? `${format(bonusSummary.unlocked)} / ${format(bonusSummary.total)}` : "0"]
         ];
 
         container.innerHTML = rows.map(rowHTML).join("");

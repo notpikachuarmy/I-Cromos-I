@@ -11,7 +11,7 @@
 const LINK_CSV_CROMOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQVmg-Qn17A0Ms4NLdYAbQHcwkVrvwPD7ORJxKlMDNcY6JGTfQ7p_i4LCiy0-B74Wcs_9Jwc1nZ1KfO/pub?output=csv";
 const LINK_CSV_ALBUMES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwFTVpC8PBxaPzki-PImk153OhSllxX3_iot9FdLpnVzYWJpxq8DbU5NHTkiXsZN2peQI9XkbD9gh1/pub?output=csv";
 
-const APP_VERSION = "2.1.0";
+const APP_VERSION = "2.2.0";
 const CSV_CACHE_KEYS = {
     cards: "tototo_csv_cards_v1",
     albums: "tototo_csv_albums_v1"
@@ -70,6 +70,12 @@ function crearEstadoBase() {
 
         albumPrestige: {},
         albumPassiveClaims: {},
+        collectionBonuses: {},
+
+        favorites: [],
+        showcase: [],
+        packHistory: [],
+        bestOpening: null,
 
         upgrades: {},
 
@@ -113,7 +119,12 @@ function crearEstadoBase() {
 
         settings: {
             soundEnabled: true,
-            theme: "auto"
+            theme: "auto",
+            smartOpening: {
+                stopOnUR: false,
+                stopOnAlbumComplete: false,
+                compactSummary: false
+            }
         }
     };
 }
@@ -161,6 +172,8 @@ async function iniciarJuego() {
         await cargarDatosCSV();
 
         normalizarEstado();
+        window.CollectionHub?.ensureState?.();
+        window.CollectionHub?.checkAllBonuses?.({ notify: false });
         recalcularDerivados();
         const offlineReward = aplicarProgresoOffline();
 
@@ -461,7 +474,11 @@ function normalizarEstado() {
         },
         settings: {
             ...base.settings,
-            ...(gameState.settings || {})
+            ...(gameState.settings || {}),
+            smartOpening: {
+                ...base.settings.smartOpening,
+                ...((gameState.settings && gameState.settings.smartOpening) || {})
+            }
         },
         upgrades: {
             ...(gameState.upgrades || {})
@@ -475,10 +492,17 @@ function normalizarEstado() {
         albumPassiveClaims: {
             ...(gameState.albumPassiveClaims || {})
         },
+        collectionBonuses: {
+            ...(gameState.collectionBonuses || {})
+        },
         fragmentos: {
             ...(gameState.fragmentos || {})
         },
-        inventario: Array.isArray(gameState.inventario) ? gameState.inventario : []
+        inventario: Array.isArray(gameState.inventario) ? gameState.inventario : [],
+        favorites: Array.isArray(gameState.favorites) ? gameState.favorites : [],
+        showcase: Array.isArray(gameState.showcase) ? gameState.showcase : [],
+        packHistory: Array.isArray(gameState.packHistory) ? gameState.packHistory.slice(0, 20) : [],
+        bestOpening: gameState.bestOpening && typeof gameState.bestOpening === "object" ? gameState.bestOpening : null
     };
 
     CONFIG_ALBUMES.forEach(album => {
@@ -527,6 +551,10 @@ function calcularClickValue() {
         value *= window.Upgrades.getClickBonusMultiplier();
     }
 
+    if (window.CollectionHub?.getClickMultiplier) {
+        value *= window.CollectionHub.getClickMultiplier();
+    }
+
     return Math.max(1, Math.floor(value));
 }
 
@@ -545,6 +573,10 @@ function calcularProduccionPasivaTotal() {
 
     if (window.Upgrades?.getPassiveBonusMultiplier) {
         total *= window.Upgrades.getPassiveBonusMultiplier();
+    }
+
+    if (window.CollectionHub?.getPassiveMultiplier) {
+        total *= window.CollectionHub.getPassiveMultiplier();
     }
 
     return Math.floor(total);
@@ -804,6 +836,7 @@ function renderTodo() {
     if (window.Achievements?.render) window.Achievements.render(CURRENT_ACHIEVEMENT_FILTER);
     if (window.Missions?.render) window.Missions.render();
     if (window.Statistics?.render) window.Statistics.render();
+    if (window.CollectionHub?.render) window.CollectionHub.render();
 
     renderMochila();
 
@@ -1265,6 +1298,8 @@ window.Tototo = {
     setState: newState => {
         gameState = newState;
         normalizarEstado();
+        window.CollectionHub?.ensureState?.();
+        window.CollectionHub?.checkAllBonuses?.({ notify: false });
         recalcularDerivados();
         guardar();
         renderTodo();

@@ -1,7 +1,7 @@
 {
   "name": "Tototo Clicker",
   "short_name": "Tototo",
-  "description": "Juego clicker y colección de cromos.",
+  "description": "Juego clicker y colección de cromos con laboratorio, vitrina e historial de aperturas.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",

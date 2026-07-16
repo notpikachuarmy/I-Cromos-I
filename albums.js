@@ -20,6 +20,7 @@ window.Albums = (() => {
         const totalPercent = document.getElementById("global-total-percent");
         const rarityCounts = document.getElementById("global-rareza-counts");
         const albumsCompleted = document.getElementById("global-albums-completed");
+        const collectionBonuses = document.getElementById("global-collection-bonuses");
 
         if (!totalPercent || !rarityCounts || !albumsCompleted) return;
 
@@ -63,6 +64,18 @@ window.Albums = (() => {
         `).join("");
 
         albumsCompleted.textContent = `Álbumes completados ahora: ${window.Tototo.formatNumber(completed)} / ${window.Tototo.formatNumber(albums.length)}`;
+
+        if (collectionBonuses && window.CollectionHub?.getEffectSummary) {
+            const bonusSummary = window.CollectionHub.getEffectSummary();
+            collectionBonuses.innerHTML = `
+                <p><strong>Bonificaciones de colección:</strong> ${bonusSummary.unlocked} / ${bonusSummary.total}</p>
+                <div class="modal-stats" style="justify-content:center">
+                    <span class="stat-pill">👆 +${bonusSummary.clickPercent}% click</span>
+                    <span class="stat-pill">⚙️ +${bonusSummary.passivePercent}% pasiva</span>
+                    <span class="stat-pill">♻️ +${bonusSummary.fragmentPercent}% fragmentos</span>
+                </div>
+            `;
+        }
     }
 
     function renderAlbumList() {
@@ -86,6 +99,8 @@ window.Albums = (() => {
             const prestige = state.albumPrestige[album.id] || 0;
             const claims = state.albumPassiveClaims[album.id] || 0;
             const passive = total * 10 * claims;
+            const albumBonuses = window.CollectionHub?.getAlbumBonusProgress?.(album.id) || [];
+            const unlockedBonuses = albumBonuses.filter(item => item.unlocked).length;
 
             return `
                 <article class="album-cover-card"
@@ -102,7 +117,10 @@ window.Albums = (() => {
                     <div class="album-meta">
                         <h3>${window.Tototo.escapeHTML(album.nombre)}</h3>
 
-                        ${complete ? `<span class="album-complete-badge">Completado</span>` : ""}
+                        <div class="album-badge-row">
+                            ${complete ? `<span class="album-complete-badge">Completado</span>` : ""}
+                            ${unlockedBonuses ? `<span class="album-bonus-badge">🧩 ${unlockedBonuses} / ${albumBonuses.length}</span>` : ""}
+                        </div>
 
                         <div class="progress-line">
                             <span>Cromos</span>
@@ -169,6 +187,7 @@ window.Albums = (() => {
         const stats = document.getElementById("album-modal-stats");
         const grid = document.getElementById("album-modal-grid");
         const prestigeButton = document.getElementById("prestige-album-button");
+        const bonuses = document.getElementById("album-modal-bonuses");
 
         if (!title || !subtitle || !stats || !grid || !prestigeButton) return;
 
@@ -184,6 +203,17 @@ window.Albums = (() => {
             <span class="stat-pill">Pasiva actual: ${window.Tototo.formatNumber(passive)}/s</span>
             <span class="stat-pill">Nueva recompensa al completar: +${window.Tototo.formatNumber(nextReward)}/s</span>
         `;
+
+        if (bonuses && window.CollectionHub?.getAlbumBonusProgress) {
+            const bonusProgress = window.CollectionHub.getAlbumBonusProgress(albumId);
+            bonuses.innerHTML = bonusProgress.map(item => `
+                <div class="album-bonus-item ${item.unlocked ? "unlocked" : ""}">
+                    <span>${item.icon} <strong>${window.Tototo.escapeHTML(item.title)}</strong></span>
+                    <span>${item.unlocked ? "Desbloqueado permanentemente" : `${window.Tototo.formatNumber(item.owned)} / ${window.Tototo.formatNumber(item.total)}`}</span>
+                    <small>${window.Tototo.escapeHTML(item.description)}</small>
+                </div>
+            `).join("");
+        }
 
         resetAlbumFilters();
         renderFilteredAlbumCards();
@@ -205,6 +235,8 @@ window.Albums = (() => {
         if (complete) {
             ensureAlbumCompletionReward(albumId);
         }
+
+        window.CollectionHub?.checkAlbumBonuses?.(albumId, { notify: false });
 
         window.Tototo.openModal("album-modal");
     }
@@ -277,13 +309,19 @@ window.Albums = (() => {
         const owned = state.inventario.includes(card.id);
         const info = state.encyclopedia?.[card.id] || {};
         const timesObtained = info.timesObtained || (owned ? 1 : 0);
+        const favorite = owned && window.CollectionHub?.isFavorite?.(card.id);
+        const showcased = owned && window.CollectionHub?.isShowcased?.(card.id);
 
         return `
-            <article class="cromo-card ${owned ? "" : "locked"}"
+            <article class="cromo-card ${owned ? "" : "locked"} ${favorite ? "favorite" : ""}"
                      data-open-card="${window.Tototo.escapeHTML(card.id)}"
                      role="button"
                      tabindex="0"
                      aria-label="${owned ? `Ver ${window.Tototo.escapeHTML(card.nombre)}` : `Cromo ${window.Tototo.escapeHTML(card.id)} bloqueado`}">
+                <span class="cromo-card-badges">
+                    ${showcased ? '<span title="En vitrina">🏛️</span>' : ""}
+                    ${favorite ? '<span title="Favorito">⭐</span>' : ""}
+                </span>
                 <img src="${window.Tototo.escapeHTML(card.imagen)}"
                      alt="${owned ? window.Tototo.escapeHTML(card.nombre) : "Cromo bloqueado"}"
                      class="cromo-img rareza-${window.Tototo.escapeHTML(card.rareza)} ${owned ? "" : "bloqueado"}"
@@ -372,8 +410,14 @@ window.Albums = (() => {
             }
         });
 
+        const newBonuses = window.CollectionHub?.checkAllBonuses?.({ notify: true }) || 0;
+        changed = changed || newBonuses > 0;
+
         if (changed) {
+            window.Tototo.recalculate();
+            window.Tototo.save();
             render();
+            window.CollectionHub?.render?.();
             window.Tototo.renderLight();
         }
 
@@ -403,6 +447,7 @@ window.Albums = (() => {
 
         const cardIds = new Set(cards.map(card => card.id));
         state.inventario = state.inventario.filter(cardId => !cardIds.has(cardId));
+        window.CollectionHub?.pruneUnavailable?.();
 
         state.albumPrestige[albumId] = (state.albumPrestige[albumId] || 0) + 1;
 

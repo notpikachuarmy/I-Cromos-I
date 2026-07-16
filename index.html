@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tototo Clicker 2.1</title>
+    <title>Tototo Clicker 2.2</title>
     <meta name="description" content="Juego clicker y colección de cromos: abre sobres, completa álbumes, consigue logros y prestigia tu colección.">
     <meta name="theme-color" content="#17171f">
     <meta name="color-scheme" content="light dark">
@@ -43,7 +43,7 @@
             <div class="brand-block">
                 <div class="brand-title-row">
                     <div>
-                        <h1>Tototo Clicker 2.1 🪙</h1>
+                        <h1>Tototo Clicker 2.2 🪙</h1>
                         <p>Colecciona cromos, completa álbumes y prestigia tus colecciones.</p>
                     </div>
                     <div class="quick-controls" aria-label="Ajustes rápidos">
@@ -73,6 +73,7 @@
             <button class="tab-button active" data-tab="inicio" role="tab" aria-selected="true" aria-controls="tab-inicio">🏠 Inicio</button>
             <button class="tab-button" data-tab="tienda" role="tab" aria-selected="false" aria-controls="tab-tienda">🛒 Tienda</button>
             <button class="tab-button" data-tab="albumes" role="tab" aria-selected="false" aria-controls="tab-albumes">📚 Álbumes</button>
+            <button class="tab-button" data-tab="vitrina" role="tab" aria-selected="false" aria-controls="tab-vitrina">🌟 Vitrina</button>
             <button class="tab-button" data-tab="laboratorio" role="tab" aria-selected="false" aria-controls="tab-laboratorio">🧪 Laboratorio</button>
             <button class="tab-button" data-tab="mochila" role="tab" aria-selected="false" aria-controls="tab-mochila">🎒 Mochila</button>
             <button class="tab-button" data-tab="logros" role="tab" aria-selected="false" aria-controls="tab-logros">🏆 Logros</button>
@@ -125,19 +126,52 @@
                     <h2>Tienda de sobres</h2>
                     <p>Compra sobres por monedas o canjéalos con fragmentos.</p>
                 </div>
-                <div class="panel pack-amount-panel">
-                    <span>Cantidad al abrir/canjear:</span>
+                <div class="panel pack-controls-panel">
+                    <div class="pack-amount-panel">
+                        <label for="pack-open-amount">Cantidad al abrir/canjear:</label>
+                        <select id="pack-open-amount">
+                            <option value="1">1 sobre</option>
+                            <option value="5">5 sobres</option>
+                            <option value="10">10 sobres</option>
+                            <option value="25">25 sobres</option>
+                            <option value="100">100 sobres</option>
+                            <option value="250">250 sobres</option>
+                            <option value="max">Máximo posible (hasta 50.000)</option>
+                        </select>
+                    </div>
 
-            <select id="pack-open-amount">
-                <option value="1">1 sobre</option>
-                <option value="5">5 sobres</option>
-                <option value="10">10 sobres</option>
-                <option value="100">100 sobres</option>
-            </select>
-        </div>
+                    <div id="smart-opening-panel" class="smart-opening-panel" aria-label="Apertura inteligente">
+                        <h3>Apertura inteligente</h3>
+                        <label class="smart-option">
+                            <input id="smart-stop-ur" type="checkbox">
+                            <span><strong>Detener al conseguir una UR</strong><small data-smart-status="stopOnUR">Requiere Sensor UR en el Laboratorio.</small></span>
+                        </label>
+                        <label class="smart-option">
+                            <input id="smart-stop-album" type="checkbox">
+                            <span><strong>Detener al completar el álbum</strong><small data-smart-status="stopOnAlbumComplete">Requiere Finalizador de álbum.</small></span>
+                        </label>
+                        <label class="smart-option">
+                            <input id="smart-summary-filter" type="checkbox">
+                            <span><strong>Mostrar solo nuevos o SSR/UR</strong><small data-smart-status="compactSummary">Requiere Resumen inteligente.</small></span>
+                        </label>
+                    </div>
+                </div>
+
                 <div id="pack-list" class="card-grid shop-grid">
                     <div class="empty-state">Cargando sobres...</div>
                 </div>
+
+                <section class="panel opening-history-panel" aria-labelledby="opening-history-title">
+                    <div class="panel-heading-row">
+                        <div>
+                            <h3 id="opening-history-title">Historial de aperturas</h3>
+                            <p class="text-muted">Tus últimas aperturas y la mejor sesión registrada.</p>
+                        </div>
+                        <button id="clear-opening-history" class="secondary-button compact-button" type="button">Limpiar historial</button>
+                    </div>
+                    <div id="best-opening" class="best-opening empty-state">Todavía no hay aperturas registradas.</div>
+                    <div id="opening-history-list" class="opening-history-list"></div>
+                </section>
             </section>
 
             <section id="tab-albumes" class="tab-section" role="tabpanel" tabindex="0" hidden>
@@ -150,11 +184,48 @@
                     <div id="global-total-percent">Cargando progreso...</div>
                     <div id="global-rareza-counts"></div>
                     <div id="global-albums-completed"></div>
+                    <div id="global-collection-bonuses"></div>
                 </div>
 
                 <div id="album-container" class="card-grid album-grid-list">
                     <div class="empty-state">Cargando álbumes...</div>
                 </div>
+            </section>
+
+
+            <section id="tab-vitrina" class="tab-section" role="tabpanel" tabindex="0" hidden>
+                <div class="section-heading">
+                    <h2>Vitrina y favoritos</h2>
+                    <p>Guarda tus cromos preferidos y expón hasta seis como escaparate principal de tu colección.</p>
+                </div>
+
+                <section class="panel showcase-panel">
+                    <div class="panel-heading-row">
+                        <div>
+                            <h3>Vitrina principal</h3>
+                            <p class="text-muted">Los cromos expuestos también se añaden automáticamente a favoritos.</p>
+                        </div>
+                        <strong id="showcase-count">0 / 6</strong>
+                    </div>
+                    <div id="showcase-grid" class="showcase-grid"></div>
+                </section>
+
+                <section class="panel collection-bonus-panel">
+                    <h3>Bonificaciones de colección</h3>
+                    <p class="text-muted">Se desbloquean permanentemente la primera vez que completas cada conjunto de rareza de un álbum.</p>
+                    <div id="collection-bonus-summary"></div>
+                </section>
+
+                <section class="panel favorites-panel">
+                    <div class="panel-heading-row">
+                        <div>
+                            <h3>Cromos favoritos</h3>
+                            <p class="text-muted">Abre cualquier ficha de cromo obtenido para marcarlo como favorito o llevarlo a la vitrina.</p>
+                        </div>
+                        <strong id="favorite-count">0</strong>
+                    </div>
+                    <div id="favorite-grid" class="favorite-grid"></div>
+                </section>
             </section>
 
             <section id="tab-laboratorio" class="tab-section" role="tabpanel" tabindex="0" hidden>
@@ -175,6 +246,10 @@
                     <div class="progress-line">
                         <span>Bonus fragmentos</span>
                         <strong id="lab-fragment-bonus">+0%</strong>
+                    </div>
+                    <div class="progress-line">
+                        <span>Bonificaciones de colección</span>
+                        <strong id="lab-collection-bonus">0</strong>
                     </div>
                 </div>
 
@@ -272,7 +347,7 @@
             <button id="import-save-button" type="button">📂 Importar partida</button>
             <button id="reset-save-button" type="button">🗑️ Reiniciar partida</button>
             <input type="file" id="import-input" accept="application/json,.json" hidden>
-            <p id="app-status" class="app-status" aria-live="polite">Versión 2.1.0</p>
+            <p id="app-status" class="app-status" aria-live="polite">Versión 2.2.0</p>
         </section>
     </div>
 
@@ -289,6 +364,7 @@
                 </div>
             </div>
             <div id="album-modal-stats" class="modal-stats"></div>
+            <div id="album-modal-bonuses" class="album-bonus-list"></div>
             <div class="album-toolbar" aria-label="Filtros del álbum">
                 <label class="search-field">
                     <span class="sr-only">Buscar cromo</span>
@@ -343,6 +419,7 @@
     <script src="statistics.js"></script>
     <script src="achievements.js"></script>
     <script src="missions.js"></script>
+    <script src="collection.js"></script>
     <script src="upgrades.js"></script>
     <script src="encyclopedia.js"></script>
     <script src="prestige.js"></script>

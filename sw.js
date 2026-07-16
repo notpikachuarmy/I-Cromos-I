@@ -1,5 +1,5 @@
-const CACHE_VERSION = "tototo-v2.1.0";
-const RUNTIME_CACHE = "tototo-runtime-v2.1.0";
+const CACHE_VERSION = "tototo-v2.2.0";
+const RUNTIME_CACHE = "tototo-runtime-v2.2.0";
 
 const APP_SHELL = [
     "./",
@@ -10,6 +10,7 @@ const APP_SHELL = [
     "./statistics.js",
     "./achievements.js",
     "./missions.js",
+    "./collection.js",
     "./upgrades.js",
     "./encyclopedia.js",
     "./prestige.js",

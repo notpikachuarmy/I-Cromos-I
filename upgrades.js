@@ -130,6 +130,30 @@ window.Upgrades = (() => {
             description: () => "Los duplicados generan un 50% más de fragmentos.",
             cost: 6000,
             category: "Fragmentos"
+        },
+        {
+            id: "auto_stop_ur",
+            type: "unique",
+            title: "Sensor UR",
+            description: () => "Permite detener una apertura múltiple automáticamente en cuanto aparece una UR.",
+            cost: 12000,
+            category: "Automatización"
+        },
+        {
+            id: "auto_stop_album",
+            type: "unique",
+            title: "Finalizador de álbum",
+            description: () => "Detiene una apertura múltiple justo cuando el álbum del sobre queda completado.",
+            cost: 15000,
+            category: "Automatización"
+        },
+        {
+            id: "compact_pack_summary",
+            type: "unique",
+            title: "Resumen inteligente",
+            description: () => "Permite ocultar duplicados comunes y mostrar únicamente cromos nuevos, SSR y UR en los resúmenes.",
+            cost: 6000,
+            category: "Automatización"
         }
     ];
 
@@ -185,8 +209,13 @@ window.Upgrades = (() => {
         if (!state) return;
 
         setText("lab-click-power", window.Tototo.formatNumber(window.Tototo.getState().clickValue || 1));
-        setText("lab-passive-multiplier", `x${window.Tototo.formatDecimal(getPassiveBonusMultiplier(), 2)}`);
-        setText("lab-fragment-bonus", `+${Math.round((getFragmentMultiplier() - 1) * 100)}%`);
+        const collectionPassive = window.CollectionHub?.getPassiveMultiplier?.() || 1;
+        const collectionFragments = window.CollectionHub?.getFragmentMultiplier?.() || 1;
+        const collectionSummary = window.CollectionHub?.getEffectSummary?.();
+
+        setText("lab-passive-multiplier", `x${window.Tototo.formatDecimal(getPassiveBonusMultiplier() * collectionPassive, 2)}`);
+        setText("lab-fragment-bonus", `+${Math.round((getFragmentMultiplier() * collectionFragments - 1) * 100)}%`);
+        setText("lab-collection-bonus", collectionSummary ? `${collectionSummary.unlocked} / ${collectionSummary.total}` : "0");
 
         const summary = document.querySelector(".upgrade-summary");
         if (!summary) return;
@@ -343,7 +372,8 @@ window.Upgrades = (() => {
             Fragmentos: "♻️",
             Tienda: "🛒",
             Suerte: "🍀",
-            Colección: "📚"
+            Colección: "📚",
+            Automatización: "🤖"
         };
 
         return icons[def.category] || "🧪";

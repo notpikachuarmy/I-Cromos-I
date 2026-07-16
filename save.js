@@ -100,8 +100,17 @@ window.SaveSystem = (() => {
         if (!isPlainObject(merged.fragmentos)) merged.fragmentos = {};
         if (!isPlainObject(merged.albumPrestige)) merged.albumPrestige = {};
         if (!isPlainObject(merged.albumPassiveClaims)) merged.albumPassiveClaims = {};
+        if (!isPlainObject(merged.collectionBonuses)) merged.collectionBonuses = {};
         if (!isPlainObject(merged.upgrades)) merged.upgrades = {};
         if (!isPlainObject(merged.encyclopedia)) merged.encyclopedia = {};
+
+        if (!Array.isArray(merged.favorites)) merged.favorites = [];
+        if (!Array.isArray(merged.showcase)) merged.showcase = [];
+        if (!Array.isArray(merged.packHistory)) merged.packHistory = [];
+        merged.favorites = [...new Set(merged.favorites.map(String))];
+        merged.showcase = [...new Set(merged.showcase.map(String))].slice(0, 6);
+        merged.packHistory = merged.packHistory.slice(0, 20);
+        if (!isPlainObject(merged.bestOpening)) merged.bestOpening = null;
 
         if (!isPlainObject(merged.achievements)) merged.achievements = { claimed: {} };
         if (!isPlainObject(merged.achievements.claimed)) merged.achievements.claimed = {};

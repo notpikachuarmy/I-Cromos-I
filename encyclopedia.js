@@ -91,6 +91,7 @@ window.Encyclopedia = (() => {
         const advanced = window.Upgrades?.hasAdvancedEncyclopedia?.() || false;
 
         detail.innerHTML = renderCardDetail(card, album, entry, owned, advanced);
+        window.CollectionHub?.bindCardDetailActions?.(card.id);
 
         window.Tototo.openModal("card-modal");
     }
@@ -145,6 +146,7 @@ window.Encyclopedia = (() => {
                 </div>
 
                 ${renderTags(card)}
+                ${window.CollectionHub?.renderCardActions?.(card, owned) || ""}
             </div>
         `;
     }

@@ -47,6 +47,7 @@ window.Prestige = (() => {
         if (!ok) return false;
 
         removeAlbumCardsFromInventory(albumId);
+        window.CollectionHub?.pruneUnavailable?.();
 
         state.albumPrestige[albumId] = currentPrestige + 1;
 
@@ -108,6 +109,7 @@ window.Prestige = (() => {
             window.Upgrades.renderSummary();
         }
 
+        window.CollectionHub?.render?.();
         window.Tototo.renderLight();
     }
 
