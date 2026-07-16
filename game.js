@@ -11,7 +11,7 @@
 const LINK_CSV_CROMOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQVmg-Qn17A0Ms4NLdYAbQHcwkVrvwPD7ORJxKlMDNcY6JGTfQ7p_i4LCiy0-B74Wcs_9Jwc1nZ1KfO/pub?output=csv";
 const LINK_CSV_ALBUMES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwFTVpC8PBxaPzki-PImk153OhSllxX3_iot9FdLpnVzYWJpxq8DbU5NHTkiXsZN2peQI9XkbD9gh1/pub?output=csv";
 
-const APP_VERSION = "2.2.0";
+const APP_VERSION = "2.2.1";
 const CSV_CACHE_KEYS = {
     cards: "tototo_csv_cards_v1",
     albums: "tototo_csv_albums_v1"
@@ -1211,9 +1211,19 @@ function prepararInstalacionPWA() {
 function registrarServiceWorker() {
     if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
 
-    navigator.serviceWorker.register("./sw.js").catch(error => {
-        console.warn("No se pudo registrar el service worker:", error);
+    let reloadingForUpdate = false;
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (reloadingForUpdate) return;
+        reloadingForUpdate = true;
+        location.reload();
     });
+
+    navigator.serviceWorker.register("./sw.js")
+        .then(registration => registration.update())
+        .catch(error => {
+            console.warn("No se pudo registrar el service worker:", error);
+        });
 }
 
 /* =========================

@@ -1,5 +1,5 @@
-const CACHE_VERSION = "tototo-v2.2.0";
-const RUNTIME_CACHE = "tototo-runtime-v2.2.0";
+const CACHE_VERSION = "tototo-v2.2.1";
+const RUNTIME_CACHE = "tototo-runtime-v2.2.1";
 
 const APP_SHELL = [
     "./",

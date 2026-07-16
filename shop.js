@@ -151,26 +151,26 @@ window.Shop = (() => {
     function renderSmartControls() {
         ensureShopState();
         const settings = window.Tototo.getState().settings.smartOpening;
+        const panel = document.getElementById("smart-opening-panel");
         const controls = {
             stopOnUR: document.getElementById("smart-stop-ur"),
             stopOnAlbumComplete: document.getElementById("smart-stop-album"),
             compactSummary: document.getElementById("smart-summary-filter")
         };
 
+        let visibleOptions = 0;
+
         Object.entries(controls).forEach(([key, input]) => {
             if (!input) return;
 
             const unlocked = isSmartFeatureUnlocked(key);
+            const option = input.closest(".smart-option");
+
+            if (option) option.hidden = !unlocked;
             input.disabled = !unlocked;
             input.checked = unlocked && Boolean(settings[key]);
-            input.closest(".smart-option")?.classList.toggle("locked", !unlocked);
 
-            const status = document.querySelector(`[data-smart-status="${key}"]`);
-            if (status) {
-                status.textContent = unlocked
-                    ? "Desbloqueado. Puedes activarlo o desactivarlo cuando quieras."
-                    : getSmartLockedText(key);
-            }
+            if (unlocked) visibleOptions += 1;
 
             if (!input.dataset.boundSmartOption) {
                 input.dataset.boundSmartOption = "true";
@@ -181,15 +181,8 @@ window.Shop = (() => {
                 });
             }
         });
-    }
 
-    function getSmartLockedText(key) {
-        const labels = {
-            stopOnUR: "Requiere Sensor UR en el Laboratorio.",
-            stopOnAlbumComplete: "Requiere Finalizador de álbum en el Laboratorio.",
-            compactSummary: "Requiere Resumen inteligente en el Laboratorio."
-        };
-        return labels[key] || "Requiere una mejora del Laboratorio.";
+        if (panel) panel.hidden = visibleOptions === 0;
     }
 
     function isSmartFeatureUnlocked(key) {

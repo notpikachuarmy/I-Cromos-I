@@ -164,19 +164,45 @@ window.Upgrades = (() => {
         if (!container) return;
 
         const state = window.Tototo.getState();
+        const categoryOrder = [
+            "Automatización",
+            "Click",
+            "Pasiva",
+            "Fragmentos",
+            "Tienda",
+            "Suerte",
+            "Colección"
+        ];
+        const orderedDefinitions = [...UPGRADE_DEFINITIONS].sort((a, b) => {
+            const aIndex = categoryOrder.indexOf(a.category);
+            const bIndex = categoryOrder.indexOf(b.category);
+            return (aIndex === -1 ? categoryOrder.length : aIndex)
+                - (bIndex === -1 ? categoryOrder.length : bIndex);
+        });
+        let previousCategory = null;
 
-        container.innerHTML = UPGRADE_DEFINITIONS.map(def => {
+        container.innerHTML = orderedDefinitions.map(def => {
             const level = getLevel(def.id);
             const owned = isOwned(def.id);
             const maxed = isMaxed(def);
             const cost = getUpgradeCost(def);
             const canBuy = state.coins >= cost && !maxed;
             const status = getStatusText(def, level, owned, maxed);
+            const categoryHeading = def.category !== previousCategory
+                ? `<div class="upgrade-category-heading">
+                       <h3>${getIcon(def)} ${window.Tototo.escapeHTML(def.category)}</h3>
+                       ${def.category === "Automatización"
+                           ? "<p>Desbloquea opciones que aparecerán directamente en la tienda.</p>"
+                           : ""}
+                   </div>`
+                : "";
+
+            previousCategory = def.category;
 
             return `
+                ${categoryHeading}
                 <article class="upgrade-card ${maxed ? "maxed" : ""}">
-                    <h3>${getIcon(def)} ${window.Tototo.escapeHTML(def.title)}</h3>
-                    <p class="text-muted">${window.Tototo.escapeHTML(def.category)}</p>
+                    <h3>${window.Tototo.escapeHTML(def.title)}</h3>
                     <p>${window.Tototo.escapeHTML(def.description(level))}</p>
 
                     <div class="progress-line">

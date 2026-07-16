@@ -140,19 +140,19 @@
                         </select>
                     </div>
 
-                    <div id="smart-opening-panel" class="smart-opening-panel" aria-label="Apertura inteligente">
+                    <div id="smart-opening-panel" class="smart-opening-panel" aria-label="Apertura inteligente" hidden>
                         <h3>Apertura inteligente</h3>
-                        <label class="smart-option">
+                        <label class="smart-option" data-smart-option="stopOnUR" hidden>
                             <input id="smart-stop-ur" type="checkbox">
-                            <span><strong>Detener al conseguir una UR</strong><small data-smart-status="stopOnUR">Requiere Sensor UR en el Laboratorio.</small></span>
+                            <span><strong>Detener al conseguir una UR</strong></span>
                         </label>
-                        <label class="smart-option">
+                        <label class="smart-option" data-smart-option="stopOnAlbumComplete" hidden>
                             <input id="smart-stop-album" type="checkbox">
-                            <span><strong>Detener al completar el álbum</strong><small data-smart-status="stopOnAlbumComplete">Requiere Finalizador de álbum.</small></span>
+                            <span><strong>Detener al completar el álbum</strong></span>
                         </label>
-                        <label class="smart-option">
+                        <label class="smart-option" data-smart-option="compactSummary" hidden>
                             <input id="smart-summary-filter" type="checkbox">
-                            <span><strong>Mostrar solo nuevos o SSR/UR</strong><small data-smart-status="compactSummary">Requiere Resumen inteligente.</small></span>
+                            <span><strong>Mostrar solo nuevos o SSR/UR</strong></span>
                         </label>
                     </div>
                 </div>
@@ -347,7 +347,7 @@
             <button id="import-save-button" type="button">📂 Importar partida</button>
             <button id="reset-save-button" type="button">🗑️ Reiniciar partida</button>
             <input type="file" id="import-input" accept="application/json,.json" hidden>
-            <p id="app-status" class="app-status" aria-live="polite">Versión 2.2.0</p>
+            <p id="app-status" class="app-status" aria-live="polite">Versión 2.2.1</p>
         </section>
     </div>
 

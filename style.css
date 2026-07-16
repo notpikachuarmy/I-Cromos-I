@@ -756,6 +756,32 @@ button:disabled,
     margin: 0 auto 20px;
 }
 
+
+.upgrade-category-heading {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 10px;
+    padding: 12px 4px 6px;
+    border-bottom: 1px solid var(--border);
+}
+
+.upgrade-category-heading:first-child {
+    margin-top: 0;
+}
+
+.upgrade-category-heading h3,
+.upgrade-category-heading p {
+    margin: 0;
+}
+
+.upgrade-category-heading p {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
 .upgrade-card.maxed {
     border-color: rgba(46, 204, 113, 0.55);
 }
@@ -1490,6 +1516,12 @@ select {
     margin: 0;
 }
 
+
+.smart-opening-panel[hidden],
+.smart-option[hidden] {
+    display: none !important;
+}
+
 .smart-opening-panel {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1511,11 +1543,6 @@ select {
     border-radius: 14px;
     background: var(--surface-2);
     cursor: pointer;
-}
-
-.smart-option.locked {
-    opacity: 0.62;
-    cursor: not-allowed;
 }
 
 .smart-option input {
@@ -1859,6 +1886,13 @@ select {
 }
 
 @media (max-width: 900px) {
+
+    .upgrade-category-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
     .smart-opening-panel,
     .album-bonus-list {
         grid-template-columns: 1fr;
